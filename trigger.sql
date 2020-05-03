@@ -56,3 +56,58 @@ DECLARE @Id INT, @NewName VARCHAR(50),@NewEmail VARCHAR(50),
 
  UPDATE tblStudents SET Name= 'Md Ashiqur Rahman', Email='ars@gmail.com' WHERE Id=1
  SELECT * FROM tblStudentsAudit
+
+ --Instead of INSERT trigger
+
+ SELECT * FROM vwStudents
+ INSERT INTO vwStudents (Name, Gender,Department,DateOfBirth)
+	VALUES('Name','Male','Computer Science & Engineering','2000-01-01')
+
+ALTER TRIGGER tr_vwStudents_InsteadofInsert
+ON vwStudents INSTEAD OF INSERT
+AS 
+BEGIN
+DECLARE @GenderId INT, @DepartmentId INT
+
+SELECT @GenderId = g.Id, @DepartmentId = d.Id
+FROM inserted i
+LEFT JOIN tblGender g ON g.Name = i.Gender
+LEFT JOIN tblDepartment d ON d.Name = i.Department
+
+--validation
+IF(@GenderId IS NULL)
+BEGIN
+	RAISERROR('Invalid Gender. Statement terminated',16,1)
+	RETURN
+END
+IF(@DepartmentId IS NULL)
+BEGIN
+	RAISERROR('Invalid Department Name. Statement terminated',16,1)
+	RETURN
+END
+
+INSERT INTO tblStudents(Name,GenderId,DepartmentId,DateOfBirth,Email)
+SELECT Name, @GenderId,@DepartmentId,DateOfBirth,Email FROM inserted
+END
+
+INSERT INTO vwStudents (Name, Gender,Department,DateOfBirth,Email)
+	VALUES('Mr Abc','Male','Computer Science & Engineering','2001-01-01','abc@gmail.com')
+
+SELECT * FROM tblStudents
+SELECT * FROM vwStudents
+SELECT * FROM tblDepartment
+UPDATE vwStudents SET Department='Computer Science & Engineering' WHERE Id = 1
+
+--Instead of Update
+ --https://csharp-video-tutorials.blogspot.com/2012/09/instead-of-update-triggers-part-46.html
+
+--Instead of Delete
+	DELETE vwStudents WHERE Id=13
+	
+	CREATE TRIGGER tr_vwStudents_InsteadOfDelete
+	ON vwStudents INSTEAD OF DELETE
+	AS BEGIN 
+	DELETE tblStudents FROM tblStudents
+	JOIN deleted ON deleted.Id=tblStudents.Id
+	END
+
