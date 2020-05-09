@@ -17,15 +17,15 @@ Begin
  Declare @ProductName nvarchar(50)
  Select @ProductName = Name from tblProducts where Id = @ProductId
  
- if(@ProductName = 'Product - 55')
+ if(@ProductName = 'Product-55')
  Begin
   Update tblProductSales set UnitPrice = 55 where ProductId = @ProductId
  End
- else if(@ProductName = 'Product - 65')
+ else if(@ProductName = 'Product-65')
  Begin
   Update tblProductSales set UnitPrice = 65 where ProductId = @ProductId
  End
- else if(@ProductName like 'Product - 100%')
+ else if(@ProductName like 'Product-100%')
  Begin
   Update tblProductSales set UnitPrice = 1000 where ProductId = @ProductId
  End
@@ -37,3 +37,8 @@ End
 CLOSE ProductIdCursor 
 -- Deallocate, the resources associated with the cursor
 DEALLOCATE ProductIdCursor
+
+Select  Name, UnitPrice 
+from tblProducts join
+tblProductSales on tblProducts.Id = tblProductSales.ProductId
+where (Name='Product-55' or Name='Product-65' or Name like 'Product-100%')
